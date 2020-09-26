@@ -29,6 +29,7 @@ class Guide extends Component {
   }
   static propTypes = {
     children: PropTypes.any,
+    content: PropTypes.any,
     visible: PropTypes.bool,
     onCancel: PropTypes.func,
     onOk: PropTypes.func,
@@ -198,6 +199,7 @@ class Guide extends Component {
       return (
         <div className="guide-container" ref={(e) => this.guide = e}>
           {this.props.children}
+          {this.props.content}
           {this.props.visible&&guideNodes}
         </div>
       )

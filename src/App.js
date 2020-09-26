@@ -23,6 +23,7 @@ class App extends Component {
       <div>
         <Guide 
           visible={this.state.visible} 
+          content={<div>8888</div>} 
           onCancel={this.handleCancel.bind(this)} >
             <div data-step="1" data-tip='Hello World' style={{ width: '200px', height: '40px'}}>Step1</div>
       </Guide>
