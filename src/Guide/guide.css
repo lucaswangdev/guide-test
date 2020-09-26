@@ -27,24 +27,6 @@
   background-color: rgba(255, 255, 255, 0.9)
 }
 
-.guide-icon-no{
-  position: absolute;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  z-index: 999998;
-  color: #fff;
-  background: linear-gradient(to bottom,#409EFF 0%,#007fff 100%);
-  font-weight: 6000;
-  padding: 1px;
-  font-size: 13px;
-  line-height: 20px;
-  font-family: Arial,verdana,tahoma;
-  text-shadow: 1px 1px 1px rgba(0,0,0,.3);
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,.4);
-  transition: all .3s ease-out;
-}
-
 .guide-tooltip{
   position: absolute;
   /* border-radius: 5px; */

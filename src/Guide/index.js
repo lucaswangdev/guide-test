@@ -2,18 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './guide.css';
 
-function getListFromLike(listLike) {
-  if (!listLike) {
-    return
-  }
-  var list = []
-
-  for (var i = 0, len = listLike.length; i < len; i++) {
-    list.push(listLike[i])
-  }
-  return list
-}
-
 function getWindowInfo() {
   return {
     winW: window.innerWidth,
@@ -23,11 +11,13 @@ function getWindowInfo() {
 
 class Guide extends Component {
   static defaultProps = {
+    id: '',
     visible: false,
     onCancel: function () {},
     onOk: function () {}
   }
   static propTypes = {
+    id: PropTypes.string,
     children: PropTypes.any,
     content: PropTypes.any,
     visible: PropTypes.bool,
@@ -36,8 +26,8 @@ class Guide extends Component {
   }
   constructor (props) {
     super(props)
-    this.nodeList = []
-    this.dots = []
+    this.node = ''
+    this.dot = ''
     this.state = {
       activeIndex: 0,
       contentStyle: {},
@@ -49,12 +39,12 @@ class Guide extends Component {
     }
   }
   componentDidMount () {
-    const {dots, nodeList} = this._getMarkDomInfo()
-    this.nodeList = nodeList
-    this.dots = dots
+    const {dot, node} = this._getMarkDomInfo()
+    this.node = node
+    this.dot = dot
     window.addEventListener('resize', this.onRezieWindow.bind(this), false)
-    this._setTargetIndex(this.nodeList[0], 0)
-    this._setDot(this.dots[0], 0,'start')
+    this._setTargetIndex(this.node, 0)
+    this._setDot(this.dot, 0,'start')
   }
 
   componentWillUnmount () {
@@ -62,12 +52,11 @@ class Guide extends Component {
   }
   // when resize window, change tooltip  position
   onRezieWindow () {
-    const {dots} = this._getMarkDomInfo()
-    let dot = dots[this.state.activeIndex]
+    const {dot} = this._getMarkDomInfo()
     this.setState({
       tipStyle: this._getTipStyle(dot),
       contentStyle: dot,
-      dots,
+      dot,
     })
   }
   // click shadow
@@ -79,7 +68,7 @@ class Guide extends Component {
   }
 
   // to set some params according to dot
-  _setDot (dot, newIndex, action) {
+  _setDot (dot, action) {
     let delay = action === 'start'?100:350
     this.setState({
       contentStyle: dot,
@@ -88,7 +77,7 @@ class Guide extends Component {
         opacity: 0
       },
     })
-    this._focusTarget(newIndex)
+    this._focusTarget()
     var timer = setTimeout(() => {
       this.setState({
         tipStyle: this._getTipStyle(dot),
@@ -96,25 +85,21 @@ class Guide extends Component {
       clearTimeout(timer)
     }, delay)
   }
+
+  
   _getMarkDomInfo() {
-    const nodeList = getListFromLike(this.guide.querySelectorAll('[data-step]'))
-    nodeList.sort((a, b) => {
-      return Number(a.getAttribute('data-step'))- Number(b.getAttribute('data-step'))
-    })
-    let dots = nodeList.map(node => {
-      let height = node.clientHeight || node.offsetHeight
-      let width = node.clientWidth || node.offsetWidth
-      return {
+    const node = this.guide.querySelector('#step1');
+    let height = node.clientHeight || node.offsetHeight
+    let width = node.clientWidth || node.offsetWidth
+    let dot = {
         left: node.offsetLeft,
         top: node.offsetTop,
         height,
         width,
-        step: node.getAttribute('data-step'),
         fRight: node.offsetLeft + width,
         fBottom: node.offsetTop + height
-      }
-    })
-    return {dots, nodeList}
+    }
+    return {dot, node}
   }
 
   // tooltip style
@@ -143,24 +128,22 @@ class Guide extends Component {
     })
     return tipObj
   }
+
   // active target content style
-  _setTargetIndex (node, newIndex) {
+  _setTargetIndex (node) {
     var timer = setTimeout(() => {
       node.style.setProperty('position', 'relative');
       node.style.setProperty('z-index', '999996', 'important');
       clearTimeout(timer)
     }, 300)
-    if (newIndex !== this.state.activeIndex) {
-      this._removeActive()
-    }
   }
 
   // to change scroll to focus target
-  _focusTarget(targetIndex) {
+  _focusTarget() {
     var {winW, winH} = getWindowInfo()
-    var {top, bottom, left, right} = this.nodeList[targetIndex].getBoundingClientRect()
-    let dTop = this.dots[targetIndex].top
-    let dLeft = this.dots[targetIndex].left
+    var {top, bottom, left, right} = this.node.getBoundingClientRect()
+    let dTop = this.dot.top
+    let dLeft = this.dot.left
     let topBool = top > winH || top < 0 || bottom > winH
     let leftBool = left > winW || left < 0 || right > winW
     if (topBool || leftBool) {
@@ -169,17 +152,11 @@ class Guide extends Component {
   }
   // reomve active style
   _removeActive() {
-    let lastNode = this.nodeList[this.state.activeIndex]
-    if (lastNode) {
-      lastNode.style.setProperty('position', '');
-    }
+    this.node.style.setProperty('position', '');
   }
   // close guide
   _closeGuide (event) {
     this._removeActive()
-    this.setState({
-      activeIndex: 0
-    })
     this.props.onCancel(event)
   }
   
@@ -189,17 +166,17 @@ class Guide extends Component {
   }
   render () {
       var guideNodes = [
-        <div className="guide-shadow" ref={(e) =>  this.shadow = e} onClick={this.onClickShadow.bind(this)} key='guide-shadow'></div>,
+        <div className="guide-shadow" ref={(e) => this.shadow = e} onClick={this.onClickShadow.bind(this)} key='guide-shadow'></div>,
         <div className="guide-content" key='guide-content' style={this.state.contentStyle} >
           <div className="guide-tooltip" style={this.state.tipStyle} >
             <div className={`guide-arrow ${this.state.arrowClass}`}></div>
+            {this.props.content}
           </div>
         </div>
       ]
       return (
         <div className="guide-container" ref={(e) => this.guide = e}>
           {this.props.children}
-          {this.props.content}
           {this.props.visible&&guideNodes}
         </div>
       )
